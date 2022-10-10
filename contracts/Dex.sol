@@ -3,12 +3,16 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/utils/math/SafeMath.sol';
+import 'hardhat/console.sol';
 
 contract DexV1 {
     using SafeMath for *;
 
     address[] public tokens;
+
+    // bool public isApproved;
 
     constructor(address[] memory _tokens) {
         for (uint256 i; i < _tokens.length; i++) {
@@ -16,12 +20,6 @@ contract DexV1 {
             require(index != address(0), 'Constructor: Invalid Address');
             tokens.push(index);
         }
-    }
-
-    function approveContract(address _token, uint256 amount) public returns (bool) {
-        require(amount > 0, "Approve Contract: Enter 'Amount' greater than zero");
-        bool allowed = IERC20(_token).approve(address(this), amount);
-        return allowed;
     }
 
     function getUserTokenBalance(address _token) public view returns (uint256) {
@@ -61,9 +59,12 @@ contract DexV1 {
         require(tokenToSwapB != address(0), 'Swap: Invalid token B address');
         require(amountToswap > 0, 'Swap: Amount is invalid or too low');
         require(
-            approveContract(tokenToSwapA, amountToswap) == true,
-            'Swap: Not approved from the token'
+            amountToswap < IERC20(tokenToSwapA).allowance(msg.sender, address(this)),
+            'Swap: Amount is geater than Allowed'
         );
+
+        // approveContract(tokenToSwapA, amountToswap);
+        // require(isApproved, 'Swap: Not approved from the token');
 
         uint256 userTokenAmount = getUserTokenBalance(tokenToSwapA);
         require(userTokenAmount > 0, 'Swap: Insufficien token');
@@ -85,27 +86,28 @@ contract DexV1 {
         address _y,
         uint256 _amount
     ) public view returns (uint256) {
-        uint256 x = IERC20(_x).totalSupply();
-        uint256 y = IERC20(_y).totalSupply();
+        uint256 x = (IERC20(_x).balanceOf(address(this))).sub(_amount);
+        uint256 xWithBalance = x.add(_amount);
+        uint256 y = IERC20(_y).balanceOf(address(this));
+        uint256 totalTokenInContract = x * y;
         // uint256 amount = 997.div(1000);
 
-        uint256 totalTokenX = x + _amount;
+        uint256 num = totalTokenInContract;
+        uint256 den = xWithBalance;
+        uint256 division = num.div(den);
+        uint256 gettinY = y - division; // Note Transfer division to contract
+        uint256 yWithCharges = gettinY.mul(3).div(1000);
 
-        uint256 num = (y.mul(997).mul(totalTokenX)).div(1000);
-        uint256 simpl = (997.mul(totalTokenX)).div(1000); //simpl=> Random var name
-        uint256 den = x.add(simpl);
-        uint256 yPriceChange = num / den;
+        uint256 tokenY = gettinY - yWithCharges;
 
-        uint256 amount = y.sub(yPriceChange);
-
-        return amount;
+        return tokenY;
     }
 
     function _tokenCanBeSwap(address token) private view returns (bool) {
         require(token != address(0), 'Helper[Token Can Be Swap]: Invalid Address');
         bool isEqual;
         for (uint256 i; i < tokens.length; i++) {
-            address index = tokens[1];
+            address index = tokens[i];
             if (index == token) {
                 isEqual = true;
             }

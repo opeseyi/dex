@@ -1,14 +1,15 @@
-import { HardhatUserConfig } from 'hardhat/config';
-import '@nomicfoundation/hardhat-toolbox';
-import 'ethereum-waffle';
 import '@typechain/hardhat';
 import '@nomiclabs/hardhat-etherscan';
+import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-gas-reporter';
 import 'dotenv/config';
 import 'solidity-coverage';
 import 'hardhat-deploy';
-// import 'hardhat-deploy-ethers';
+import { HardhatUserConfig } from 'hardhat/config';
+// import '@nomicfoundation/hardhat-toolbox';
+// import 'ethereum-waffle';
+import 'hardhat-deploy-ethers';
 
 const GOERLI_RPC_URL = process.env.GOERLI_API_KEY;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;

@@ -41,9 +41,7 @@ const deployDex: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         waitConfirmations: 1,
     });
     log('-------DEPLOYED DEX-------');
-
-    console.log(args);
 };
 
 export default deployDex;
-deployDex.tags = ['all', 'dex'];
+deployDex.tags = ['all'];
