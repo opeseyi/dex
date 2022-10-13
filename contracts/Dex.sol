@@ -43,8 +43,8 @@ contract DexV1 {
 
         uint256 amount = tokenY.sub(yPriceChange);
 
-        (bool success, ) = address(this).call{value: ethInput}("");
-        require(success, "EthTOToke: Transfer Failed");
+        (bool success, ) = payable(address(this)).call{value: ethInput}("");
+        require(success, "EthToToken: Transfer Failed");
         bool isSuccessful = IERC20(_tokenY).transfer(msg.sender, amount);
         require(isSuccessful, "EthToToken: Transfer Failed to consumer");
         return amount;
