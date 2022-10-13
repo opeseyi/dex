@@ -1,22 +1,22 @@
-import '@typechain/hardhat';
-import '@nomiclabs/hardhat-etherscan';
-import '@nomiclabs/hardhat-waffle';
-import '@nomiclabs/hardhat-ethers';
-import 'hardhat-gas-reporter';
-import 'dotenv/config';
-import 'solidity-coverage';
-import 'hardhat-deploy';
-import { HardhatUserConfig } from 'hardhat/config';
+import "@typechain/hardhat";
+import "@nomiclabs/hardhat-etherscan";
+import "@nomiclabs/hardhat-waffle";
+import "@nomiclabs/hardhat-ethers";
+import "hardhat-gas-reporter";
+import "dotenv/config";
+import "solidity-coverage";
+import "hardhat-deploy";
+import { HardhatUserConfig } from "hardhat/config";
 // import '@nomicfoundation/hardhat-toolbox';
 // import 'ethereum-waffle';
-import 'hardhat-deploy-ethers';
+import "hardhat-deploy-ethers";
 
 const GOERLI_RPC_URL = process.env.GOERLI_API_KEY;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 const config: HardhatUserConfig = {
-    defaultNetwork: 'hardhat',
-    solidity: '0.8.17',
+    defaultNetwork: "hardhat",
+    solidity: "0.8.16",
     networks: {
         hardhat: {
             chainId: 31337,
@@ -45,8 +45,8 @@ const config: HardhatUserConfig = {
     },
     gasReporter: {
         enabled: false,
-        currency: 'USD',
-        outputFile: 'gas-report.txt',
+        currency: "USD",
+        outputFile: "gas-report.txt",
         noColors: true,
     },
     mocha: {

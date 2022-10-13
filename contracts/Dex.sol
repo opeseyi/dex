@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.16;
 
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
-import 'hardhat/console.sol';
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract DexV1 {
     using SafeMath for *;
@@ -15,17 +14,17 @@ contract DexV1 {
     // bool public isApproved;
 
     constructor(address[] memory _tokens) {
-        for (uint256 i; i < _tokens.length; i++) {
+        for (uint256 i = 0; i < _tokens.length; i++) {
             address index = _tokens[i];
-            require(index != address(0), 'Constructor: Invalid Address');
+            require(index != address(0), "Constructor: Invalid Address");
             tokens.push(index);
         }
     }
 
     function getUserTokenBalance(address _token) public view returns (uint256) {
-        require(_token != address(0), 'User Balance: Invalid Address');
+        require(_token != address(0), "User Balance: Invalid Address");
         bool token = _tokenCanBeSwap(_token);
-        require(token == true, 'User Balance: Token is not allowed');
+        require(token == true, "User Balance: Token is not allowed");
 
         uint256 amountOfTokens = IERC20(_token).balanceOf(msg.sender);
 
@@ -44,9 +43,10 @@ contract DexV1 {
 
         uint256 amount = tokenY.sub(yPriceChange);
 
-        (bool success, ) = address(this).call{value: ethInput}('');
-        require(success, 'EthTOToke: Transfer Failed');
-        IERC20(_tokenY).transfer(msg.sender, amount);
+        (bool success, ) = address(this).call{value: ethInput}("");
+        require(success, "EthTOToke: Transfer Failed");
+        bool isSuccessful = IERC20(_tokenY).transfer(msg.sender, amount);
+        require(isSuccessful, "EthToToken: Transfer Failed to consumer");
         return amount;
     }
 
@@ -55,28 +55,34 @@ contract DexV1 {
         address tokenToSwapB,
         uint256 amountToswap
     ) public returns (uint256) {
-        require(tokenToSwapA != address(0), 'Swap: Invalid token A address');
-        require(tokenToSwapB != address(0), 'Swap: Invalid token B address');
-        require(amountToswap > 0, 'Swap: Amount is invalid or too low');
+        require(tokenToSwapA != address(0), "Swap: Invalid token A address");
+        require(tokenToSwapB != address(0), "Swap: Invalid token B address");
+        require(amountToswap > 0, "Swap: Amount is invalid or too low");
         require(
             amountToswap < IERC20(tokenToSwapA).allowance(msg.sender, address(this)),
-            'Swap: Amount is geater than Allowed'
+            "Swap: Amount is geater than Allowed"
         );
 
         // approveContract(tokenToSwapA, amountToswap);
         // require(isApproved, 'Swap: Not approved from the token');
 
         uint256 userTokenAmount = getUserTokenBalance(tokenToSwapA);
-        require(userTokenAmount > 0, 'Swap: Insufficien token');
+        require(userTokenAmount > 0, "Swap: Insufficien token");
 
         bool _tokenA = _tokenCanBeSwap(tokenToSwapA);
-        require(_tokenA == true, 'Swap: Token is not Allowed');
+        require(_tokenA == true, "Swap: Token is not Allowed");
         bool _tokenB = _tokenCanBeSwap(tokenToSwapB);
-        require(_tokenB == true, 'Swap: Token is not Allowed');
+        require(_tokenB == true, "Swap: Token is not Allowed");
 
-        IERC20(tokenToSwapA).transferFrom(msg.sender, address(this), amountToswap);
+        bool isSuccessful = IERC20(tokenToSwapA).transferFrom(
+            msg.sender,
+            address(this),
+            amountToswap
+        );
+        require(isSuccessful, "Swap: Transfer of Failed to contract");
         uint256 amount = _getPrice(tokenToSwapA, tokenToSwapB, amountToswap);
-        IERC20(tokenToSwapB).transfer(msg.sender, amount);
+        bool success = IERC20(tokenToSwapB).transfer(msg.sender, amount);
+        require(success, "SWAP: Transfer Not successful to consumer");
 
         return amount;
     }
@@ -104,10 +110,12 @@ contract DexV1 {
     }
 
     function _tokenCanBeSwap(address token) private view returns (bool) {
-        require(token != address(0), 'Helper[Token Can Be Swap]: Invalid Address');
-        bool isEqual;
-        for (uint256 i; i < tokens.length; i++) {
-            address index = tokens[i];
+        require(token != address(0), "Helper[Token Can Be Swap]: Invalid Address");
+        bool isEqual = false;
+        uint256 tokensLength = tokens.length;
+        for (uint256 i = 0; i < tokensLength; i++) {
+            address tokenAddress = tokens[i];
+            address index = tokenAddress;
             if (index == token) {
                 isEqual = true;
             }

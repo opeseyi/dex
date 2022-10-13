@@ -1,14 +1,14 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { assert, expect } from 'chai';
-import { BigNumber } from 'ethers';
-import { deployments, ethers, getNamedAccounts, network } from 'hardhat';
-import { developmentChains } from '../helper-hardhat.config';
-import { DexV1, DAI, USDC, USDT } from '../typechain-types';
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { assert, expect } from "chai";
+import { BigNumber } from "ethers";
+import { deployments, ethers, getNamedAccounts, network } from "hardhat";
+import { developmentChains } from "../helper-hardhat.config";
+import { DexV1, DAI, USDC, USDT } from "../typechain-types";
 
-const AMOUNT = ethers.utils.parseEther('1');
+const AMOUNT = ethers.utils.parseEther("1");
 !developmentChains.includes(network.name)
     ? describe.skip
-    : describe('Dex Test', () => {
+    : describe("Dex Test", () => {
           let accounts: SignerWithAddress[];
           let dex: DexV1;
           let usdc: USDC;
@@ -17,14 +17,14 @@ const AMOUNT = ethers.utils.parseEther('1');
           beforeEach(async () => {
               //   deployer = (await getNamedAccounts()).deployer;
               accounts = await ethers.getSigners();
-              await deployments.fixture(['all']);
-              dex = await ethers.getContract('DexV1');
-              usdc = await ethers.getContract('USDC');
-              dai = await ethers.getContract('DAI');
-              usdt = await ethers.getContract('USDT');
+              await deployments.fixture(["all"]);
+              dex = await ethers.getContract("DexV1");
+              usdc = await ethers.getContract("USDC");
+              dai = await ethers.getContract("DAI");
+              usdt = await ethers.getContract("USDT");
           });
-          describe('Constructor', function () {
-              it('Initialized the constructor', async () => {
+          describe("Constructor", function () {
+              it("Initialized the constructor", async () => {
                   const args = [dai.address, usdc.address, usdt.address];
                   console.log(args);
                   const token1 = await dex.tokens(0);
@@ -38,29 +38,29 @@ const AMOUNT = ethers.utils.parseEther('1');
                   //   assert.equal(await dex.tokens.length, args.length);
               });
           });
-          describe('Swap Token', () => {
-              it('Checks both Tokens Address are Valid ', async () => {
+          describe("Swap Token", () => {
+              it("Checks both Tokens Address are Valid ", async () => {
                   const zeroAddress = ethers.constants.AddressZero;
 
                   expect(dai.address != zeroAddress);
                   expect(usdc.address != zeroAddress);
                   expect(
                       dex.swapTokenAtoTokenB(zeroAddress, usdc.address, AMOUNT)
-                  ).to.be.revertedWith('Swap: Invalid token A address');
+                  ).to.be.revertedWith("Swap: Invalid token A address");
               });
-              it('Checks Your Balance and if it > 0', async () => {
-                  const AMOUNT = ethers.utils.parseEther('1');
-                  const amount = ethers.utils.parseEther('0');
+              it("Checks Your Balance and if it > 0", async () => {
+                  const AMOUNT = ethers.utils.parseEther("1");
+                  const amount = ethers.utils.parseEther("0");
 
                   expect(AMOUNT > amount);
                   expect(
                       dex.swapTokenAtoTokenB(dai.address, usdc.address, amount)
-                  ).to.be.revertedWith('Swap: Amount is invalid or too low');
+                  ).to.be.revertedWith("Swap: Amount is invalid or too low");
                   expect(
                       dex.swapTokenAtoTokenB(dai.address, usdc.address, AMOUNT)
-                  ).to.not.be.revertedWith('Swap: Amount is invalid or too low');
+                  ).to.not.be.revertedWith("Swap: Amount is invalid or too low");
               });
-              it('It get the token amount to be tansferred back', async () => {});
+              it("It get the token amount to be tansferred back", async () => {});
               it('Transfer the "token amount"', async () => {
                   // TRansfer usdc to dex
                   const trannsferUsdcToDex = await usdc.transfer(dex.address, 100);
@@ -83,9 +83,9 @@ const AMOUNT = ethers.utils.parseEther('1');
                   //   const allowances = await dex.getAllowance(usdt.address);
                   console.log(`         Allowance ${allowance}`);
                   const usdcContractBalance: any = await usdc.balanceOf(dex.address);
-                  console.log('         Dex balance usdc ' + usdcContractBalance);
+                  console.log("         Dex balance usdc " + usdcContractBalance);
                   const daiContractBalance: any = await dai.balanceOf(dex.address);
-                  console.log('         Dex balance dai ' + daiContractBalance);
+                  console.log("         Dex balance dai " + daiContractBalance);
                   const operationSwap = await dex.swapTokenAtoTokenB(
                       usdc.address,
                       dai.address,
